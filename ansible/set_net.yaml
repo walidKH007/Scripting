@@ -1,0 +1,22 @@
+---
+- hosts: all
+  user: root
+  sudo: yes
+  tasks:
+  - name: Setup br
+    shell: ovs-vsctl add-br br0
+
+  - name: activation du bridge br
+    shell: ip link set dev br0 up
+
+  - name: activation du bridge OVS
+    shell: ip link set dev ovs-system up
+
+  - name: etat du bridge
+    shell: ovs-vsctl show
+
+
+
+#   openvswitch_bridge:
+#      bridge: br0
+#      state: present

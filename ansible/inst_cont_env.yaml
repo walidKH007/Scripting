@@ -1,0 +1,20 @@
+---
+- hosts: all
+  tasks:
+   - name : update pakages
+     apt : update_cache=yes
+
+   - name : install lxc pakages
+     apt : name=lxc state=present
+     apt : name=lxctl state=present
+
+   - name : installation openvswitch
+     apt : name=openvswitch-common state=present
+     apt : name=openvswitch-switch state=present
+
+   - name : install lxc-templates
+     apt : name=lxc-templates state=present
+
+   - name : install bridge-utils
+     apt : name=bridge-utils state=present
+

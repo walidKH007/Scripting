@@ -1,0 +1,112 @@
+---
+- hosts: all
+
+  vars:
+  - interface: lxcbr0
+
+  tasks:
+  - name: apt lxc packages are installed on host
+    apt: 
+      name  : '{{ item }}' 
+      state : present
+    with_items:
+    - lxc
+    - lxc-dev
+    - lxctl
+    - lxc-templates
+    - openvswitch-common
+    - openvswitch-switch
+    - bridge-utils
+    - python-lxc
+    
+  - name: pip lxc packages are installed on host
+    pip:
+      name: '{{ item }}'
+    with_items:
+    - lxc-python2
+    
+  - name: Setup br
+    shell: ovs-vsctl add-br br1
+  
+  - name: activation du bridge br
+    shell: ip link set dev br1 up
+
+  - name: activation du bridge OVS
+    shell: ip link set dev ovs-system up
+
+  - copy:
+      dest: /etc/default/lxc-net
+      content: |
+        USE_LXC_BRIDGE="true"
+
+  - copy:
+      dest: /etc/lxc/default.conf 
+      content: |
+        lxc.network.type = veth
+        lxc.network.link = {{ interface }}
+        lxc.network.flags = up
+        lxc.network.hwaddr = 00:16:3e:xx:xx:xx
+
+  - service:
+      name: lxc-net
+      state: started
+
+ 
+    
+  - name: Create container
+    lxc_container:
+       name: '{{ item }}'
+       template: ubuntu
+       state: stopped
+       template_options: --release trusty
+    with_items:
+        - C1
+        - C2
+        - C3
+    
+  - copy:
+      dest: /etc/default/lxc-net 
+      content: |
+        LXC_ADDR="10.0.42.42"
+        LXC_NETWORK="10.0.42.0/24"
+        LXC_DHCP_RANGE="10.0.42.100,10.0.42.200"
+        
+  - copy:
+      dest: /var/lib/lxc/{{item}}/config 
+      content: |
+        lxc.cgroup.memory.limit_in_bytes=250M
+        lxc.cgroup.cpuset.cpus=1
+      with_items:
+        - C1
+        - C2
+        - C3
+
+  - service:
+      name: lxc-net
+      state: restarted
+    
+    
+  - name: Create container
+    lxc_container:
+       name: '{{ item }}'
+       state: started
+       container_command: |
+         passwd root 
+    with_items:
+       - C1
+       - C2
+       - C3
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

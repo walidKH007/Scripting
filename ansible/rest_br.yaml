@@ -1,0 +1,11 @@
+---
+- hosts: all
+  user: root
+  sudo: yes
+  tasks:
+   - name: copy script
+     copy: src=./rest_br.sh dest=/root/script.sh mode=a+x
+   - name: execute script
+     shell: ./script.sh
+
+
